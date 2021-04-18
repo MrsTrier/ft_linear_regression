@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 
+
 class Model:
     X = []
     Y = []
@@ -37,15 +38,15 @@ class Model:
 
     def get_fit_quality(self):
         mae = self.measure_mae()
-        print(f'MAE: { round(mae, 3) }')
+        print(f'MAE: {round(mae, 3)}')
         mse = self.measure_mse()
-        print(f'MSE: { round(mse, 3) }')
+        print(f'MSE: {round(mse, 3)}')
         r_2 = self.measure_r_2()
-        print(f'R2: { round(r_2, 3) }')
+        print(f'R2: {round(r_2, 3)}')
 
     def print_coefficients(self):
-        print(f'Theta1: { round(self.theta1, 3) }')
-        print(f'Theta0: { round(self.theta0, 3) }')
+        print(f'Theta1: {round(self.theta1, 3)}')
+        print(f'Theta0: {round(self.theta0, 3)}')
 
 
 def update_theta0(df, learning_rate, theta0):
@@ -58,20 +59,25 @@ def update_theta1(df, learning_rate, theta1):
     theta1 = theta1 - (learning_rate * df.error_mul_by_X.sum() / float(df.shape[0]))
     return theta1
 
+
 def update_df_with_estimated_price(df, theta0, theta1):
     df['estimated_Y'] = df.X_scaled * theta1 + theta0
     return df
+
 
 def update_df_with_errors(df):
     df['errors'] = df.estimated_Y - df.Y
     return df
 
+
 def scale_x(df):
     df['X_scaled'] = df.X / max(df.X)
+
 
 def write_results_into(model, df):
     model.estimated_Y = df.estimated_Y
     model.max_x = max(df.X)
+
 
 def write_into_file(theta0, theta1):
     try:
@@ -80,6 +86,7 @@ def write_into_file(theta0, theta1):
         theta_value_file.close()
     except Exception:
         print("Error: something went wrong while writing into file.")
+
 
 def fit(df, model):
     learning_rate = 0.1
@@ -94,15 +101,16 @@ def fit(df, model):
         model.theta0 = update_theta0(df, learning_rate, model.theta0)
         model.theta1 = update_theta1(df, learning_rate, model.theta1)
         model.theta0_path.append(model.theta0)
-        model.theta1_path.append(model.theta1/max(df.X))
+        model.theta1_path.append(model.theta1 / max(df.X))
         df = update_df_with_estimated_price(df, model.theta0, model.theta1)
         df = update_df_with_errors(df)
         mse_tmp = mse
         mse = pow(df.errors, 2).sum() / float(df.shape[0])
-    write_into_file(model.theta0, model.theta1/max(df.X))
+    write_into_file(model.theta0, model.theta1 / max(df.X))
     write_results_into(model, df)
-    model.theta1 = model.theta1/max(df.X)
+    model.theta1 = model.theta1 / max(df.X)
     return mse
+
 
 def plot_data_from(model):
     title = '{} as a function of {}'.format(model.Y.name, model.X.name)
@@ -111,6 +119,7 @@ def plot_data_from(model):
     picture.update_layout(xaxis_title=model.X.name, yaxis_title=model.Y.name, title=title)
     picture.add_trace(go.Scatter(x=model.X, y=model.estimated_Y, mode='lines', name='regression line'))
     picture.show()
+
 
 def plot_fitting_process(model):
     title = 'Fitting process'
@@ -129,6 +138,7 @@ def plot_fitting_process(model):
             i += 1
     picture.show()
 
+
 def prepare_df(csv):
     try:
         df = pd.read_csv(csv)
@@ -140,22 +150,26 @@ def prepare_df(csv):
         exit(0)
     return df
 
+
 def save_data_to(model, df):
-    model.X = df.km
-    model.Y = df.price
+    model.X = df.X
+    model.Y = df.Y
+
 
 def rename_columns(df):
     df.columns = ['X', 'Y']
     return df
 
-def train(model = None):
-    if (model == None):
+
+def train(model=None):
+    if model is None:
         model = Model()
     csv = input("Enter path to csv (without any braces): ")
     df = prepare_df(csv)
-    save_data_to(model, df)
     df = rename_columns(df)
+    save_data_to(model, df)
     fit(df, model)
+
 
 if __name__ == '__main__':
     train()
