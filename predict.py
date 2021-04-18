@@ -1,14 +1,41 @@
+
+import sys
+sys.path.append('/Users/Darya/PycharmProjects/ft_linear_regression')
 import ft_linear_regression
 
-def predict(model):
-
-    while 1:
-        X = input("Enter {} of car to predict {}: ".format(model.X.name, model.Y.name))
-        if X == "":
-            return
-        X = int(X)
-        estimated_Y = model.theta0 + model.theta1 * X/model.max_x
-        print(f'Estimated { model.Y.name } { round(estimated_Y, 3) }')
+def predict(model = None):
+    if model == None:
+        try:
+            with open('theta_value_file', 'r') as f:
+                value = f.readlines()
+                index = value[0].index('=')
+                theta0 = value[0][index + 1:]
+                theta1 = value[1][index + 1:]
+        except Exception as e:
+            print("Error: {}".format(e))
+        while 1:
+            X = input("Enter X to predict Y: ")
+            if X == "":
+                return
+            try:
+                X = int(X)
+            except Exception as e:
+                print("Error: {}".format(e))
+                exit(0)
+            estimated_Y = float(theta0) + float(theta1) * X
+            print(f"Estimated Y is { round(estimated_Y, 3) }")
+    else:
+        while 1:
+            X = input("Enter {} to predict {}: ".format(model.X.name, model.Y.name))
+            if X == "":
+                return
+            try:
+                X = int(X)
+            except Exception as e:
+                print("message: {}".format(e))
+                exit(0)
+            estimated_Y = model.theta0 + model.theta1 * X
+            print(f"Estimated { model.Y.name } is { round(estimated_Y, 3) }")
 
 class Model:
     X = []
@@ -62,17 +89,18 @@ class Model:
         print(f'Theta0: { round(self.theta0, 3) }')
 
 if __name__ == '__main__':
+    # predict()
     model = Model()
     model.train()
     model.predict()
 
     ### Раскомментируй чтобы увидеть значния коэффициентов модели ###
-    # model.print_coefficients()
+    model.print_coefficients()
 
     ### Раскомментируй чтобы увидеть графики в браузере ###
-    # ft_linear_regression.plot_data_from(model)
-    # ft_linear_regression.plot_fitting_process(model)
+    ft_linear_regression.plot_data_from(model)
+    ft_linear_regression.plot_fitting_process(model)
 
-    ### Раскомментируй чтобы увидеть параметры качества модели ###
-    # model.get_fit_quality()
+    ## Раскомментируй чтобы увидеть параметры качества модели ###
+    model.get_fit_quality()
 
